@@ -1,9 +1,6 @@
 package com.ecommerce.userauthenticationservice.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +16,7 @@ public class User extends BaseModel{
     @JoinTable(name="user_role_mapping", joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name="role_id"))
     private Set<UserRole> userRoleSet = new HashSet<>();//object intialization so that it value never null
+
+    @OneToMany(mappedBy = "user")
+    private Set<Session> session;
 }
