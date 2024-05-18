@@ -43,7 +43,7 @@ public class AuthService {
     @Autowired
     private SecretKey secretKey;
 
-    private static String secretKeyString = "secret1920";
+    private static String secretKeyString = "secret1920aldkfjurnbkgfdkkgjffkfjgjfkfkjfkfgjjf";
 
     public User signUp(String email, String password){
         //Check user is present
@@ -99,7 +99,7 @@ public class AuthService {
         claim.put("roles", userOptional.get().getUserRoleSet());
         long nowInMillis = System.currentTimeMillis();
         claim.put("iat", nowInMillis); // issued At
-        claim.put("expiry", nowInMillis+1000); // expiry time
+        claim.put("expiry", nowInMillis+10000000); // expiry time
 
 
         //Generate signature and algo
@@ -107,8 +107,8 @@ public class AuthService {
        // byte[] content = message.getBytes(StandardCharsets.UTF_8);
         //String token = Jwts.builder().content(content).compact(); //Hardedcoded content
         //String token = Jwts.builder().content(content).signWith(secretKey).compact(); //With signature and algo and hardcoded content
-        String token = Jwts.builder().claims(claim).signWith(secretKey).compact(); // With user detail as claim and auto generated secret
-        //String token = Jwts.builder().claims(claim).signWith(SignatureAlgorithm.HS256, secretKeyString).compact();// signature with user defined secret key
+        //String token = Jwts.builder().claims(claim).signWith(secretKey).compact(); // With user detail as claim and auto generated secret
+        String token = Jwts.builder().claims(claim).signWith(SignatureAlgorithm.HS256, secretKeyString).compact();// signature with user defined secret key
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         headers.add(HttpHeaders.SET_COOKIE, token);
 
@@ -132,7 +132,8 @@ public class AuthService {
 
         //check expiry of token
         //Decrypt signature
-        JwtParser jwtParser = Jwts.parser().verifyWith(secretKey).build();
+       // JwtParser jwtParser = Jwts.parser().verifyWith(secretKey).build(); //auto generated secret key
+        JwtParser jwtParser = Jwts.parser().setSigningKey(secretKeyString).build(); // user defined custom secret key
         Claims claims = jwtParser.parseSignedClaims(token).getPayload();
         Long expiry = (Long)claims.get("expiry");
         Session  session = sessionOptional.get();
