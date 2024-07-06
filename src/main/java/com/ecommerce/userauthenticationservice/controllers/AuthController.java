@@ -6,6 +6,7 @@ import com.ecommerce.userauthenticationservice.dtos.UserDto;
 import com.ecommerce.userauthenticationservice.dtos.ValidateTokenRequestDto;
 import com.ecommerce.userauthenticationservice.models.User;
 import com.ecommerce.userauthenticationservice.services.AuthService;
+import com.ecommerce.userauthenticationservice.util.Conversion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
@@ -24,17 +25,20 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private Conversion conversion;
+
     @PostMapping("/signUp")
     public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequestDto signUpRequestDto){
         User user = authService.signUp(signUpRequestDto.getEmail(), signUpRequestDto.getPassword());
-        UserDto userDto = convertUserToDto(user);
+        UserDto userDto = conversion.convertUserToDto(user);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
     @PostMapping("/loginByPassword")
     public ResponseEntity<UserDto> loginByPassword(@RequestBody LoginRequestDto loginRequestDto){
         User user = authService.loginByPassword(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-        UserDto userDto = convertUserToDto(user);
+        UserDto userDto = conversion.convertUserToDto(user);
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
         headers.add("email", user.getEmail());
         headers.add("password", user.getPassword());
@@ -45,7 +49,7 @@ public class AuthController {
     @PostMapping("/loginByPasswordAndJWT")
     public ResponseEntity<UserDto> loginByPasswordAndJWT(@RequestBody LoginRequestDto loginRequestDto){
         Pair<User, MultiValueMap<String, String>> pair = authService.loginByPasswordAndJWT(loginRequestDto.getEmail(), loginRequestDto.getPassword());
-        UserDto userDto = convertUserToDto(pair.getFirst());
+        UserDto userDto = conversion.convertUserToDto(pair.getFirst());
         return new ResponseEntity<>(userDto, pair.getSecond(), HttpStatus.OK);
     }
 
@@ -58,12 +62,4 @@ public class AuthController {
         return new ResponseEntity<>("Token is not valid", HttpStatus.BAD_REQUEST);
     }
 
-
-
-    private UserDto convertUserToDto(User user){
-        UserDto userDto = new UserDto();
-        userDto.setEmail(user.getEmail());
-        userDto.setUserRoleSet(user.getUserRoleSet());
-        return userDto;
-    }
 }
