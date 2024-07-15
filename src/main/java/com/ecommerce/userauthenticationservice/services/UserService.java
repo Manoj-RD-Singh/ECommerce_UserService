@@ -1,4 +1,4 @@
-package com.ecommerce.userauthenticationservice;
+package com.ecommerce.userauthenticationservice.services;
 
 import com.ecommerce.userauthenticationservice.Repositories.UserRepository;
 import com.ecommerce.userauthenticationservice.models.User;

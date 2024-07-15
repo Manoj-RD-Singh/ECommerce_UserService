@@ -1,6 +1,6 @@
 package com.ecommerce.userauthenticationservice.controllers;
 
-import com.ecommerce.userauthenticationservice.UserService;
+import com.ecommerce.userauthenticationservice.services.UserService;
 import com.ecommerce.userauthenticationservice.dtos.UserDto;
 import com.ecommerce.userauthenticationservice.util.Conversion;
 import org.springframework.beans.factory.annotation.Autowired;

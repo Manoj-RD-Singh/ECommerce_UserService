@@ -32,6 +32,7 @@ public class AuthController {
     public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequestDto signUpRequestDto){
         User user = authService.signUp(signUpRequestDto.getEmail(), signUpRequestDto.getPassword());
         UserDto userDto = conversion.convertUserToDto(user);
+
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 

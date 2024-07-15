@@ -2,17 +2,22 @@ package com.ecommerce.userauthenticationservice.services;
 
 import com.ecommerce.userauthenticationservice.Repositories.SessionRepository;
 import com.ecommerce.userauthenticationservice.Repositories.UserRepository;
+import com.ecommerce.userauthenticationservice.clients.KafkaProducerClient;
+import com.ecommerce.userauthenticationservice.dtos.EmailDto;
 import com.ecommerce.userauthenticationservice.exceptions.InvalidLoginPassword;
 import com.ecommerce.userauthenticationservice.exceptions.UserAlreadyExistsDuringSignUpException;
 import com.ecommerce.userauthenticationservice.exceptions.UserNotExistDuringLoginException;
 import com.ecommerce.userauthenticationservice.models.Session;
 import com.ecommerce.userauthenticationservice.models.User;
 import com.ecommerce.userauthenticationservice.models.enums.SessionState;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.MacAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class AuthService {
 
     @Autowired
@@ -43,6 +49,12 @@ public class AuthService {
     @Autowired
     private SecretKey secretKey;
 
+    @Autowired
+    private KafkaProducerClient kafkaProducerClient;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
     private static String secretKeyString = "secret1920aldkfjurnbkgfdkkgjffkfjgjfkfkjfkfgjjf";
 
     public User signUp(String email, String password){
@@ -55,6 +67,19 @@ public class AuthService {
         User user = new User();
         user.setEmail(email);
         user.setPassword(bCryptPasswordEncoder.encode(password));
+
+        //send message for email after converting email dto to string
+        EmailDto emailDto = new EmailDto();
+        emailDto.setTo("manojrdsing@gmail.com");
+        emailDto.setFrom("manojrdsingh@gmail.com");
+        emailDto.setSubject("Welcome Message");
+        emailDto.setBody("Welcome to Ecommerce");
+        try{
+            kafkaProducerClient.sendMessage("sendEmail", objectMapper.writeValueAsString(emailDto));
+        }catch(JsonProcessingException ex){
+            log.error("Error while sending email message to kafka"+ ex);
+        }
+
         return userRepository.save(user);
     }
 
